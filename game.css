@@ -1,0 +1,30 @@
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+td {
+  height: 20px;
+  width: 20px;
+  background-color: #C0C0C0;
+  border: 1.5px solid;
+  border-top-color: #ffffff;
+  border-right-color: #7B7B7B;
+  border-bottom-color: #7B7B7B;
+  border-left-color: #ffffff;
+  text-align: center;
+  vertical-align: middle;
+}
+
+td.flagged {
+  background-image: url('./img/Flag_016x016_32.png');
+  background-position-x: center;
+}
+
+td.revealed {
+  font-family: "Press Start";
+  background-color: #C0C0C0;
+  font-size: 80%;
+  text-align: center;
+  border: none;
+}
