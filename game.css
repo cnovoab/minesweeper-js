@@ -2,8 +2,15 @@ table {
   margin-left: auto;
   margin-right: auto;
 }
+td.mines, td.state, td.time {
+  height: 40px;
+  width: 40px;
+  background-color: black;
+  color: white;
+  text-align: center;
+}
 
-td {
+td.game-cell {
   height: 20px;
   width: 20px;
   background-color: #C0C0C0;
@@ -14,11 +21,17 @@ td {
   border-left-color: #ffffff;
   text-align: center;
   vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 td.flagged {
   background-image: url('./img/Flag_016x016_32.png');
   background-position-x: center;
+}
+
+td.mined {
+  background-image: url('./img/Mine_016x016_32.png');
 }
 
 td.revealed {
