@@ -1,31 +1,32 @@
-// const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
+const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
 let GAME_URL;
-const BASE_URL = 'http://localhost:3000';
+// const BASE_URL = 'http://localhost:3000';
 const grid = document.getElementById('game');
 const marquee = document.getElementById('marquee');
 let STATE;
 const plays = new Map();
+let timer;
+let elapsedTime;
 
-const newGame = (difficulty = 'beginner') => {
-  axios.post(`${BASE_URL}/games`, { difficulty })
-    .then(function(response) {
-      const game = response.data;
-      GAME_URL = `${BASE_URL}/games/${game.id}`;
-      STATE = game.state;
-      updateMarquee(game);
-      for (let i = 0; i < game.rows; i++) {
-        const row = grid.insertRow(i);
-        for (let j = 0; j < game.cols; j++) {
-          const cell = row.insertCell(j);
-          updateCell(i, j, game.board[i][j]);
-          cell.className = 'game-cell';
-        }
-      }
-    });
+const newGame = async (difficulty = 'beginner') => {
+  const response = await axios.post(`${BASE_URL}/games`, { difficulty });
+  const game = response.data;
+  GAME_URL = `${BASE_URL}/games/${game.id}`;
+  STATE = game.state;
+  updateMarquee(game);
+  for (let i = 0; i < game.rows; i++) {
+    const row = grid.insertRow(i);
+    for (let j = 0; j < game.cols; j++) {
+      const cell = row.insertCell(j);
+      updateCell(i, j, game.board[i][j]);
+      cell.className = 'game-cell';
+    }
+  }
 };
 
 const updateMarquee = game => {
   const flags = document.querySelectorAll('td.flagged').length;
+  const elapsedTime = game.started_at;
   const flagCell = marquee.rows[0].cells[0];
   const stateCell = marquee.rows[0].cells[1];
   const timeCell = marquee.rows[0].cells[2];
@@ -33,7 +34,6 @@ const updateMarquee = game => {
   stateCell.classList.remove(...stateCell.classList);
   stateCell.classList.add('state');
   stateCell.classList.add(game.state);
-  marquee.rows[0].cells[2].innerHTML = 99;
 };
 
 const updateCell = (row, col, data) => {
@@ -72,40 +72,44 @@ const visualReveal = (row, col) => {
   }
 };
 
-const revealCell = (row, col) => {
+const revealCell = async (row, col) => {
   const cell = grid.rows[row].cells[col];
   visualReveal(row, col);
-  axios.patch(`${GAME_URL}/board/${row}/${col}`, { revealed: true })
-  .then((response) => {
-    const game = response.data;
-    updateGrid(game);
-  });
+  const response = await axios.patch(`${GAME_URL}/board/${row}/${col}`, { revealed: true })
+  updateGrid(response.data);
 };
 
 const flagCell = (row, col) => {
   const cell = grid.rows[row].cells[col];
-  const flagged = grid.rows[row].cells[col].dataset.flagged === 'false';
+  const flagged = cell.dataset.flagged === 'false';
   flagged ? cell.classList.add('flagged') : cell.classList.remove('flagged');
-  axios.patch(`${GAME_URL}/board/${row}/${col}`, { flagged })
-  .then((response) => {
-    updateGrid(response.data);
-  });
+  const response = axios.patch(`${GAME_URL}/board/${row}/${col}`, { flagged });
+  updateGrid(response.data);
 };
 
-grid.addEventListener('contextmenu', event => {
+const clickOnCell = (event) => {
   event.preventDefault();
   if (event.target.className !== 'game-cell') return;
   if (['won', 'lost'].includes(STATE)) return;
+  if (!timer) setTimer();
   const { row, col } = event.target.dataset;
-  flagCell(row, col);
-});
-
-grid.addEventListener('click', event => {
-  if (!event.target.classList.contains('game-cell')) return;
-  if (['won', 'lost'].includes(STATE)) return;
-  const { row, col } = event.target.dataset;
+  if (event.type === 'contextmenu') {
+    return flagCell(row, col);
+  }
   plays.set(row * 1, (plays.get(row * 1) || []).concat(col * 1));
   revealCell(row, col);
-});
+};
 
+grid.addEventListener('contextmenu', clickOnCell, false);
+grid.addEventListener('click', clickOnCell, false);
+
+const setTimer = () => {
+  timer = setInterval(() => {
+    if (['won', 'lost'].includes(STATE)) return;
+    elapsedTime = (elapsedTime || 0) + 1;
+    marquee.rows[0].cells[2].innerText = elapsedTime.toString().padStart(3, '0');
+  }, 1000);
+};
+
+// Start new game
 newGame();
