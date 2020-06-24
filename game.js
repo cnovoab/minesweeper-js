@@ -1,14 +1,16 @@
 const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
-let GAME_URL;
+let GAME_URL, STATE, timer, elapsedTime;
 // const BASE_URL = 'http://localhost:3000';
 const grid = document.getElementById('game');
 const marquee = document.getElementById('marquee');
-let STATE;
 const plays = new Map();
-let timer;
-let elapsedTime;
+const level = document.getElementById("difficulty");
+const restartButton = document.querySelector('.state');
 
 const newGame = async (difficulty = 'beginner') => {
+  grid.innerHTML = ""
+  elapsedTime = 0;
+  document.querySelector('.time').innerText = "000";
   const response = await axios.post(`${BASE_URL}/games`, { difficulty });
   const game = response.data;
   GAME_URL = `${BASE_URL}/games/${game.id}`;
@@ -26,10 +28,7 @@ const newGame = async (difficulty = 'beginner') => {
 
 const updateMarquee = game => {
   const flags = document.querySelectorAll('td.flagged').length;
-  const elapsedTime = game.started_at;
-  const flagCell = marquee.rows[0].cells[0];
-  const stateCell = marquee.rows[0].cells[1];
-  const timeCell = marquee.rows[0].cells[2];
+  const [ flagCell, stateCell ] = marquee.rows[0].cells;
   flagCell.innerHTML = game.mines - flags;
   stateCell.classList.remove(...stateCell.classList);
   stateCell.classList.add('state');
@@ -79,15 +78,15 @@ const revealCell = async (row, col) => {
   updateGrid(response.data);
 };
 
-const flagCell = (row, col) => {
+const flagCell = async (row, col) => {
   const cell = grid.rows[row].cells[col];
   const flagged = cell.dataset.flagged === 'false';
   flagged ? cell.classList.add('flagged') : cell.classList.remove('flagged');
-  const response = axios.patch(`${GAME_URL}/board/${row}/${col}`, { flagged });
+  const response = await axios.patch(`${GAME_URL}/board/${row}/${col}`, { flagged });
   updateGrid(response.data);
 };
 
-const clickOnCell = (event) => {
+const clickOnCell = event => {
   event.preventDefault();
   if (event.target.className !== 'game-cell') return;
   if (['won', 'lost'].includes(STATE)) return;
@@ -100,16 +99,25 @@ const clickOnCell = (event) => {
   revealCell(row, col);
 };
 
-grid.addEventListener('contextmenu', clickOnCell, false);
-grid.addEventListener('click', clickOnCell, false);
+const levelChange = async (event) => {
+  const difficulty = event.target.selectedOptions[0].value;
+  await newGame(difficulty);
+};
 
 const setTimer = () => {
   timer = setInterval(() => {
-    if (['won', 'lost'].includes(STATE)) return;
+    if (['unstarted', 'won', 'lost'].includes(STATE)) return;
     elapsedTime = (elapsedTime || 0) + 1;
     marquee.rows[0].cells[2].innerText = elapsedTime.toString().padStart(3, '0');
   }, 1000);
 };
+
+grid.addEventListener('contextmenu', clickOnCell, false);
+grid.addEventListener('click', clickOnCell, false);
+level.addEventListener('change', levelChange, false);
+restartButton.addEventListener('click', () => {
+  newGame(level.selectedOptions[0].value);
+}, false);
 
 // Start new game
 newGame();

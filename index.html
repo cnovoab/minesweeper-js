@@ -2,15 +2,23 @@
   <head>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
+    <div id="difficulty-container">
+      <select id="difficulty" size="1">
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="expert">Expert</option>
+      </select>
+    </div>
     <table id="marquee" style="border: 1px solid black">
       <tr>
         <td class="mines"></td>
         <td class="state playing"></td>
-        <td class="time">000</td>
+        <td class="time"></td>
       </tr>
-    <table>
+    </table>
     <table id="game" style="border: 1px solid black">
       <tbody>
       </tbody>
