@@ -39,13 +39,7 @@ const updateCell = (row, col, data) => {
   cell.dataset.mine = data.mine;
   cell.dataset.value = data.value || '';
   if (data.revealed) {
-    cell.innerHTML = data.value;
-    if(!cell.classList.contains('revealed')) {
-      cell.classList.add('revealed');
-    }
-    if (data.mine && !cell.classList.contains('mined')) {
-      cell.classList.add('mined');
-    }
+    visualReveal(row, col);
   }
 };
 
@@ -59,8 +53,19 @@ const updateGrid = (game) => {
   updateMarquee(game);
 };
 
+const visualReveal = (row, col) => {
+  const cell = grid.rows[row].cells[col];
+  cell.classList.add('revealed');
+  if (cell.dataset.mine === 'true') {
+    cell.classList.add('mined');
+  } else if (cell.dataset.flagged === 'false') {
+    cell.innerHTML = cell.dataset.value;
+  }
+};
+
 const revealCell = (row, col) => {
   const cell = grid.rows[row].cells[col];
+  visualReveal(row, col);
   axios.patch(`${GAME_URL}/board/${row}/${col}`, { revealed: true })
   .then((response) => {
     const game = response.data;
@@ -71,13 +76,9 @@ const revealCell = (row, col) => {
 const flagCell = (row, col) => {
   const cell = grid.rows[row].cells[col];
   const flagged = grid.rows[row].cells[col].dataset.flagged === 'false';
+  flagged ? cell.classList.add('flagged') : cell.classList.remove('flagged');
   axios.patch(`${GAME_URL}/board/${row}/${col}`, { flagged })
   .then((response) => {
-    if (flagged) {
-      cell.classList.add('flagged');
-    } else {
-      cell.classList.remove('flagged');
-    }
     updateGrid(response.data);
   });
 };
