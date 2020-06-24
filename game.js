@@ -1,9 +1,10 @@
-const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
+// const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
 let GAME_URL;
-// const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3000';
 const grid = document.getElementById('game');
 const marquee = document.getElementById('marquee');
 let STATE;
+const plays = new Map();
 
 const newGame = (difficulty = 'beginner') => {
   axios.post(`${BASE_URL}/games`, { difficulty })
@@ -25,8 +26,13 @@ const newGame = (difficulty = 'beginner') => {
 
 const updateMarquee = game => {
   const flags = document.querySelectorAll('td.flagged').length;
-  marquee.rows[0].cells[0].innerHTML = game.mines - flags;
-  marquee.rows[0].cells[1].innerHTML = game.state;
+  const flagCell = marquee.rows[0].cells[0];
+  const stateCell = marquee.rows[0].cells[1];
+  const timeCell = marquee.rows[0].cells[2];
+  flagCell.innerHTML = game.mines - flags;
+  stateCell.classList.remove(...stateCell.classList);
+  stateCell.classList.add('state');
+  stateCell.classList.add(game.state);
   marquee.rows[0].cells[2].innerHTML = 99;
 };
 
@@ -58,6 +64,9 @@ const visualReveal = (row, col) => {
   cell.classList.add('revealed');
   if (cell.dataset.mine === 'true') {
     cell.classList.add('mined');
+    if (plays.has(row) && plays.get(row).includes(col)) {
+      cell.classList.add('clicked-mine');
+    }
   } else if (cell.dataset.flagged === 'false') {
     cell.innerHTML = cell.dataset.value;
   }
@@ -95,6 +104,7 @@ grid.addEventListener('click', event => {
   if (!event.target.classList.contains('game-cell')) return;
   if (['won', 'lost'].includes(STATE)) return;
   const { row, col } = event.target.dataset;
+  plays.set(row * 1, (plays.get(row * 1) || []).concat(col * 1));
   revealCell(row, col);
 });
 

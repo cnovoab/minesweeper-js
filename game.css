@@ -2,12 +2,31 @@ table {
   margin-left: auto;
   margin-right: auto;
 }
+
 td.mines, td.state, td.time {
   height: 40px;
   width: 40px;
   background-color: black;
   color: white;
   text-align: center;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+td.clicked-mine {
+  background-color: red !important;
+}
+
+td.unstarted, td.playing {
+  background-image: url('./img/Smiley1_032x032_32.png');
+}
+
+td.won {
+  background-image: url('./img/Smiley_032x032_32.png');
+}
+
+td.lost {
+  background-image: url('./img/Smiley3_032x032_32.png');
 }
 
 td.game-cell {
