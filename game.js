@@ -1,6 +1,6 @@
-// const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
+const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
 let GAME_URL;
-const BASE_URL = 'http://localhost:3000';
+// const BASE_URL = 'http://localhost:3000';
 const grid = document.getElementById('game');
 const marquee = document.getElementById('marquee');
 let STATE;
