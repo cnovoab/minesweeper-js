@@ -1,13 +1,13 @@
 const BASE_URL = 'https://minesweeper-rails-api.herokuapp.com';
-let GAME_URL, STATE, timer, elapsedTime;
+let GAME_URL, STATE, timer, elapsedTime, plays;
 // const BASE_URL = 'http://localhost:3000';
 const grid = document.getElementById('game');
 const marquee = document.getElementById('marquee');
-const plays = new Map();
 const level = document.getElementById("difficulty");
 const restartButton = document.querySelector('.state');
 
 const newGame = async (difficulty = 'beginner') => {
+  plays = new Map();
   grid.innerHTML = ""
   elapsedTime = 0;
   document.querySelector('.time').innerText = "000";
